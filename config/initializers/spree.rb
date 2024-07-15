@@ -1,0 +1,1 @@
+Spree::PermittedAttributes.source_attributes.concat([:intent, :order_id])

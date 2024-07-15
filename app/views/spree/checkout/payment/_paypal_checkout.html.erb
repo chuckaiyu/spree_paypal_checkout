@@ -1,0 +1,98 @@
+<div id="paypal-button-container" class="paypal-button-container" style="display: none;"></div>
+<%= hidden_field_tag "payment_source[#{payment_method.id}][intent]", payment_method.intent %>
+<%= hidden_field_tag "payment_source[#{payment_method.id}][order_id]", "", id: "paypal-checkout-order-id" %>
+<script type="text/javascript" src="https://www.paypal.com/sdk/js?client-id=<%= payment_method.preferred_api_key %>&currency=<%= @order.currency %>&intent=<%= payment_method.intent&.downcase %>"></script>
+
+<script type="text/javascript">
+  function paymentSelector(event) {
+    console.log("Pyament method id: " + event.target.value);
+
+    var paymentMethodId = '<%= payment_method.id %>';
+
+    if (event.target.value == paymentMethodId) {
+      console.log("PayPal button was selected! Pyament method id: " + event.target.value);
+
+      document.querySelector("#checkout_form_payment [data-hook=buttons] .checkout-content-save-continue-button").disabled = true;
+    } else {
+      document.querySelector("#checkout_form_payment [data-hook=buttons] .checkout-content-save-continue-button").disabled = false;
+    }
+  }
+
+  window.addEventListener("load", function() {
+    var paymentMethodId = '<%= payment_method.id %>';
+    var checkedRadio = document.querySelector('input[type=radio][name="order[payments_attributes][][payment_method_id]"]:checked');
+
+    if (checkedRadio.value == paymentMethodId) {
+      console.log("PayPal payment method default selected");
+
+      document.querySelector("#checkout_form_payment [data-hook=buttons] .checkout-content-save-continue-button").disabled = true;
+    }
+
+    document.querySelectorAll('input[type=radio][name="order[payments_attributes][][payment_method_id]"]').forEach((input) => {
+      input.addEventListener('click', paymentSelector);
+    });
+  });
+
+  paypal.Buttons({
+    style: {
+      layout: 'horizontal',
+      color:  'gold',
+      shape:  'rect',
+      label:  'pay',
+      tagline: 'true'
+    },
+    createOrder: function() {
+      console.log("PayPal button createOrder");
+
+      return fetch(`/paypal_checkout?payment_method_id=<%= payment_method.id %>`, {
+        method: "post"
+      })
+      .then((response) => response.json())
+      .then((data) => data['id']);
+    },
+    onApprove: function(data) {
+      console.log("PayPal button onApprove, order ID is " + data.orderID);
+
+      document.getElementById("paypal-checkout-order-id").value = data.orderID;
+      document.getElementById("payment").style.display = "none";
+      document.getElementById('checkout_form_payment').submit();
+    },
+    onCancel: function(data) {
+      console.log("PayPal button onCancel");
+
+      window.location.href = "<%= checkout_state_path('payment') %>"
+	  },
+    onInit: function(data, actions) {
+      console.log("PayPal button onInit");
+
+      var buttonContainer = document.getElementById("paypal-button-container");
+
+      if (buttonContainer.style.display === "none") {
+        buttonContainer.style.display = "block";
+      }
+
+      var paypalRadio = document.getElementById(`order_payments_attributes__payment_method_id_<%= payment_method.id %>`)
+
+      if (!paypalRadio.checked) {
+        actions.disable();
+      }
+
+      paypalRadio.addEventListener("change", function (event) {
+        if (event.target.checked) {
+          console.log("PayPal button onInit actions enable");
+
+          actions.enable();
+        } else {
+          console.log("PayPal button onInit actions disable");
+
+          actions.disable();
+        }
+      });
+    },
+    onClick: function() {
+      console.log("PayPal button onClick");
+      
+      document.querySelector("#checkout_form_payment [data-hook=buttons] .checkout-content-save-continue-button").disabled = true;
+    }
+  }).render('#paypal-button-container');
+</script>

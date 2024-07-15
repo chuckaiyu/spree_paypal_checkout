@@ -1,0 +1,43 @@
+<fieldset data-hook="paypal-checkout">
+  <legend><%= Spree.t(:paypal_checkout) %></legend>
+  <div class="table-responsive border rounded bg-white mb-3">
+    <table class="table table-condensed">
+      <tr>
+        <th width="20%"><%= Spree.t(:order_id) %>:</th>
+        <td><%= payment.source.order_id %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:intent) %>:</th>
+        <td><%= payment.source.intent %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:order_status) %>:</th>
+        <td><%= payment.source.order_status %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:capture_id) %>:</th>
+        <td><%= payment.source.capture_id %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:capture_status) %>:</th>
+        <td><%= payment.source.capture_status %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:authorization_id) %>:</th>
+        <td><%= payment.source.authorization_id %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:authorization_status) %>:</th>
+        <td><%= payment.source.authorization_status %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:authentication_expiration_time) %>:</th>
+        <td><%= payment.source.authentication_expiration_time %></td>
+      </tr>
+      <tr>
+        <th><%= Spree.t(:refunds) %>:</th>
+        <td><%= payment.source.refunds %></td>
+      </tr>
+    </table>
+  </div>
+</fieldset>
